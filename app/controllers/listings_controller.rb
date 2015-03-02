@@ -167,7 +167,12 @@ class ListingsController < ApplicationController
     listing_shape_id = params[:listing][:listing_shape_id]
     listing_shape = @current_community.listing_shapes.where(id: listing_shape_id).first
 
-    @listing = Listing.new(params[:listing].merge({transaction_type_id: listing_shape.transaction_type_id}))
+    @listing = Listing.new(
+      params[:listing].merge(
+      {
+        transaction_type_id: listing_shape.transaction_type_id,
+        transaction_process_id: listing_shape.transaction_process.id
+      }))
 
     @listing.author = @current_user
     @listing.custom_field_values = create_field_values(params[:custom_fields])
