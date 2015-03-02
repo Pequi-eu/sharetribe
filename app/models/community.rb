@@ -539,9 +539,10 @@ class Community < ActiveRecord::Base
   def hash_for_category(category, locale)
     category_hash = {"id" => category.id, "label" => category.display_name(locale)}
     if category.children.empty?
-      category_hash["listing_shapes"] = category.transaction_types.inject([]) do |transaction_type_array, transaction_type|
-        transaction_type_array << {"id" => transaction_type.id, "label" => transaction_type.display_name(locale)}
-        transaction_type_array
+      category_hash["listing_shapes"] = category.listing_shapes.inject([]) do |listing_shapes, listing_shape|
+        listing_shapes.tap { |shapes|
+          shapes << {"id" => listing_shape.id, "label" => listing_shape.transaction_process.display_name(locale)}
+        }
       end
     else
       category_hash["subcategories"] = category.children.inject([]) do |subcategory_array, subcategory|
@@ -565,7 +566,7 @@ class Community < ActiveRecord::Base
     values = {}
     values["category"] = top_level_categories.collect(&:id)
     values["subcategory"] = subcategories.collect(&:id)
-    values["listing_shape"] = transaction_types.collect(&:id)
+    values["listing_shape"] = listing_shapes.collect(&:id)
     return values
   end
 
@@ -574,7 +575,7 @@ class Community < ActiveRecord::Base
     values = {}
     values["category"] = top_level_categories
     values["subcategory"] = subcategories
-    values["listing_shape"] = transaction_types
+    values["listing_shape"] = listing_shapes
     return values
   end
 
